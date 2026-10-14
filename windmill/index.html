@@ -9,14 +9,20 @@ html,body{margin:0;height:100%;overflow:hidden;font-family:"Nunito","Avenir Next
 .glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(255,255,255,.75);box-shadow:0 10px 30px rgba(20,40,70,.25)}
 #title{position:fixed;top:14px;left:18px;padding:10px 20px;border-radius:18px;pointer-events:none}
 #title b{display:block;font-size:clamp(20px,2.6vw,32px)}#title span{font-size:clamp(13px,1.4vw,17px);opacity:.75}
-#bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;padding:12px 16px;border-radius:26px;max-width:94vw;z-index:3}
+#bar{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:5px 8px;border-radius:999px;z-index:3;background:rgba(255,255,255,.45)}
+#bar.min>*:not(#tog){display:none}
+#bar .ib{width:48px;height:48px;min-height:0;padding:0;border-radius:50%;font-size:24px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+#bar .ib::after{content:attr(data-tip);position:absolute;bottom:56px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:14px;background:rgba(0,0,0,.7);color:#fff;padding:3px 8px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .15s}
+#bar .ib:hover::after,#bar .ib:focus-visible::after{opacity:1}
+#tog{background:rgba(0,0,0,.45)}
+@media (min-width:1600px){#bar .ib{width:60px;height:60px;font-size:30px}#bar input[type=range]{width:min(22vw,120px);height:36px;accent-color:#ea580c}}
 button{font:inherit;font-weight:800;font-size:clamp(17px,2vw,24px);padding:12px 20px;border:none;border-radius:16px;cursor:pointer;color:#fff;min-height:58px;box-shadow:0 4px 0 rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35)}
 button:active{transform:translateY(2px)}
 #wind{background:linear-gradient(#22c55e,#15803d)}#wind.off{background:linear-gradient(#f87171,#b91c1c)}
 #peek{background:linear-gradient(#a78bfa,#6d28d9)}#turn{background:linear-gradient(#38bdf8,#0369a1)}
 #credBtn{position:fixed;top:14px;right:18px;background:rgba(0,0,0,.45);min-height:48px;font-size:18px;z-index:3}
-label{font-size:clamp(20px,2.2vw,28px);display:flex;align-items:center;gap:8px}
-input[type=range]{width:min(28vw,220px);height:44px;accent-color:#ea580c}
+label{font-size:20px;display:flex;align-items:center;gap:2px;padding:0 4px}
+input[type=range]{width:min(22vw,120px);height:36px;accent-color:#ea580c}
 .card{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(88vw,600px);border-radius:28px;padding:22px 26px 24px;font-size:clamp(22px,2.8vw,32px);line-height:1.4;display:none;z-index:5;background:rgba(255,255,255,.88)}
 .card.on{display:block}
 .card h2{margin:0 0 8px;color:var(--accent);font-size:1.15em;display:flex;align-items:center;gap:12px}
@@ -47,10 +53,11 @@ input[type=range]{width:min(28vw,220px);height:44px;accent-color:#ea580c}
 <p><b>Gears, shafts, water wheel, wind arrow, water and trees:</b> made in code for this page. Built with <a href="https://threejs.org" target="_blank">three.js</a> (MIT).</p>
 <p style="opacity:.75">Note: the inside gears are a simple drawing of how a mill like this works; the scan only shows the outside.</p></div>
 <div id="bar" class="glass">
-<button id="wind">💨 Wind ON</button>
-<label>🐢<input id="spd" type="range" min="0.2" max="3" step="0.1" value="1">🐇</label>
-<button id="turn">🧭 Turn cap to wind</button>
-<button id="peek">🔍 Peek inside</button>
+<button id="wind" class="ib" data-tip="Wind on/off" aria-label="Wind on/off">💨</button>
+<label title="Wind speed">🐢<input id="spd" type="range" min="0.2" max="3" step="0.1" value="1" aria-label="Wind speed">🐇</label>
+<button id="turn" class="ib" data-tip="Turn to wind" aria-label="Turn cap to wind">🧭</button>
+<button id="peek" class="ib" data-tip="Peek inside" aria-label="Peek inside">🔍</button>
+<button id="tog" class="ib" data-tip="Hide buttons" aria-label="Hide or show buttons">✕</button>
 </div>
 <div id="hsl"></div>
 <script>window.onerror=(m)=>{const e=document.createElement('div');e.id='err';e.textContent='Error: '+m;document.body.appendChild(e)};
@@ -160,13 +167,14 @@ function placeArrow(){const f=fromVec(windAng);arrow.position.copy(f.clone().mul
 // ---- clipping for peek ----
 const cp1=new THREE.Plane(),cp2=new THREE.Plane(new THREE.Vector3(0,-1,0),1.0),cp3=new THREE.Plane();
 function setPeek(v){peek=v;inside.visible=lower.visible=runner.visible=parts.visible=v;shellMats.forEach(m=>{m.clippingPlanes=v?[cp1,cp2,cp3]:null;m.clipIntersection=true;m.clipShadows=true;m.needsUpdate=true});
- $('peek').textContent=v?'🏠 Close up':'🔍 Peek inside';refreshHS()}
+ $('peek').textContent=v?'🏠':'🔍';$('peek').dataset.tip=v?'Close up':'Peek inside';refreshHS()}
 const $=id=>document.getElementById(id);
-$('wind').onclick=()=>{windOn=!windOn;$('wind').textContent=windOn?'💨 Wind ON':'🍃 Wind OFF';$('wind').classList.toggle('off',!windOn)};
+$('wind').onclick=()=>{windOn=!windOn;$('wind').textContent=windOn?'💨':'🍃';$('wind').dataset.tip=windOn?'Wind is ON':'Wind is OFF';$('wind').classList.toggle('off',!windOn)};
 $('spd').oninput=e=>spd=+e.target.value;$('peek').onclick=()=>setPeek(!peek);
 $('turn').onclick=()=>{windAng+=(Math.PI/2)*(1+Math.floor(Math.random()*2));placeArrow();show('🧭','The Wind Changed!','Uh-oh, the wind moved! Watch the miller push the long tail to turn the top of the mill, so the sails face the wind again.');setTimeout(()=>capTarget=windAng,1200)};
 function show(e,h,b){$('ch').innerHTML='<span>'+e+'</span>'+h;$('cb').textContent=b;$('card').classList.add('on')}
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.parentNode.classList.remove('on'));
+$('tog').onclick=()=>{const b=$('bar'),m=b.classList.toggle('min');$('tog').textContent=m?'🎛️':'✕';$('tog').dataset.tip=m?'Show buttons':'Hide buttons'};
 $('credBtn').onclick=()=>$('credits').classList.add('on');
 const HS=[
  {e:'🌀',w:'Sails',obj:Sails,off:[0,7,0],h:'The Sails',t:'Four big sails catch the wind. The wind pushes them, and they spin round and round!'},
@@ -183,8 +191,8 @@ const hsl=$('hsl');
 HS.forEach(h=>{const d=document.createElement('div');d.className='hs';d.innerHTML='<i>'+h.e+'</i><s>'+h.w+'</s>';d.addEventListener('pointerup',ev=>{ev.stopPropagation();show(h.e,h.h,h.t)});hsl.appendChild(d);h.el=d});
 function refreshHS(){HS.forEach(h=>h.el.classList.toggle('hide',!!h.inside&&!peek))}refreshHS();
 const v=new THREE.Vector3();
-function updHS(){HS.forEach(h=>{if(h.inside&&!peek)return;if(h.local){v.set(...h.local);h.obj.localToWorld(v)}else{h.obj.getWorldPosition(v);v.x+=h.off[0];v.y+=h.off[1];v.z+=h.off[2]}v.project(cam);
- const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;h.el.style.display=vis?'':'none';h.el.style.left=((v.x+1)/2*innerWidth)+'px';h.el.style.top=((1-v.y)/2*innerHeight)+'px'})}
+function updHS(){const br=$('bar').getBoundingClientRect();HS.forEach(h=>{if(h.inside&&!peek)return;if(h.local){v.set(...h.local);h.obj.localToWorld(v)}else{h.obj.getWorldPosition(v);v.x+=h.off[0];v.y+=h.off[1];v.z+=h.off[2]}v.project(cam);
+ const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;h.el.style.display=vis?'':'none';let X=(v.x+1)/2*innerWidth,Y=(1-v.y)/2*innerHeight;if(X>br.left-34&&X<br.right+34&&Y>br.top-40)Y=br.top-44;h.el.style.left=X+'px';h.el.style.top=Y+'px'})}
 function resize(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.fov=cam.aspect<1?60:45;cam.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();
 window.__cam=(p,t)=>{cam.position.set(...p);ctl.target.set(...t);ctl.update()};window.__peek=setPeek;
