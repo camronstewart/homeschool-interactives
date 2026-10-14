@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>A Real Dutch Windmill · De Westermolen</title>
+<style>
+:root{--glass:rgba(255,255,255,.66);--ink:#1f2a37;--accent:#c2410c}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Nunito","Avenir Next","Segoe UI Rounded","Segoe UI",system-ui,sans-serif;background:#a9c6de;color:var(--ink)}
+#c{position:fixed;inset:0;touch-action:none;width:100%;height:100%}
+.glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(255,255,255,.75);box-shadow:0 10px 30px rgba(20,40,70,.25)}
+#title{position:fixed;top:14px;left:18px;padding:10px 20px;border-radius:18px;pointer-events:none}
+#title b{display:block;font-size:clamp(20px,2.6vw,32px)}#title span{font-size:clamp(13px,1.4vw,17px);opacity:.75}
+#bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;padding:12px 16px;border-radius:26px;max-width:94vw;z-index:3}
+button{font:inherit;font-weight:800;font-size:clamp(17px,2vw,24px);padding:12px 20px;border:none;border-radius:16px;cursor:pointer;color:#fff;min-height:58px;box-shadow:0 4px 0 rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.35)}
+button:active{transform:translateY(2px)}
+#wind{background:linear-gradient(#22c55e,#15803d)}#wind.off{background:linear-gradient(#f87171,#b91c1c)}
+#peek{background:linear-gradient(#a78bfa,#6d28d9)}#turn{background:linear-gradient(#38bdf8,#0369a1)}
+#credBtn{position:fixed;top:14px;right:18px;background:rgba(0,0,0,.45);min-height:48px;font-size:18px;z-index:3}
+label{font-size:clamp(20px,2.2vw,28px);display:flex;align-items:center;gap:8px}
+input[type=range]{width:min(28vw,220px);height:44px;accent-color:#ea580c}
+.card{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(88vw,600px);border-radius:28px;padding:22px 26px 24px;font-size:clamp(22px,2.8vw,32px);line-height:1.4;display:none;z-index:5;background:rgba(255,255,255,.88)}
+.card.on{display:block}
+.card h2{margin:0 0 8px;color:var(--accent);font-size:1.15em;display:flex;align-items:center;gap:12px}
+.card .x{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.55);min-height:48px;width:48px;padding:0;border-radius:50%}
+#credits{font-size:16px;line-height:1.45;width:min(90vw,680px);max-height:80vh;overflow:auto}
+#credits h2{font-size:26px}#credits a{color:#0369a1}
+.hs{position:fixed;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;-webkit-user-select:none;z-index:2}
+.hs i{font-style:normal;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:27px;background:rgba(255,255,255,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:3px solid #fff;box-shadow:0 0 0 0 rgba(251,191,36,.8),0 4px 12px rgba(0,0,0,.3);animation:p 2s infinite}
+.hs s{text-decoration:none;margin-top:4px;font-size:15px;font-weight:800;background:rgba(255,255,255,.85);padding:2px 9px;border-radius:10px}
+.hs.hide{display:none!important}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(251,191,36,.85),0 4px 12px rgba(0,0,0,.3)}70%{box-shadow:0 0 0 16px rgba(251,191,36,0),0 4px 12px rgba(0,0,0,.3)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0),0 4px 12px rgba(0,0,0,.3)}}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;background:#a9c6de;z-index:9;flex-direction:column;gap:10px}
+#load small{font-size:16px;opacity:.7}
+#err{position:fixed;top:0;left:0;color:#b91c1c;background:#fff;font-size:14px;z-index:10}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<canvas id="c"></canvas>
+<div id="load">🌷 Loading the real windmill…<small id="lp">0%</small></div>
+<div id="title" class="glass"><b>🌷 A Real Dutch Windmill</b><span>De Westermolen, Holland · a real 3D scan! Tap the glowing circles.</span></div>
+<button id="credBtn">ⓘ Credits</button>
+<div id="card" class="card glass"><button class="x" data-close>✕</button><h2 id="ch"></h2><div id="cb"></div></div>
+<div id="credits" class="card glass"><button class="x" data-close>✕</button><h2>Credits</h2>
+<p><b>Windmill 3D scan:</b> “De Westermolen (Langerak) – Dutch Windmill” by <a href="https://sketchfab.com/3DScanServiceAmsterdam" target="_blank">3DScanServiceAmsterdam</a> (<a href="https://www.3dscanserviceamsterdam.nl" target="_blank">3dscanserviceamsterdam.nl</a>), <a href="https://sketchfab.com/3d-models/df291df2e3cd4b1cb6cc2644176e4f4c" target="_blank">sketchfab.com/3d-models/df291df2e3cd4b1cb6cc2644176e4f4c</a>, licensed <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY 4.0</a>. <i>Changes:</i> cropped, simplified (decimated), textures re-compressed, sails and top house cut into separate moving parts.</p>
+<p><b>Millstone 3D scan:</b> “Millstone” by <a href="https://sketchfab.com/Thorus3D" target="_blank">Thorus3D</a>, <a href="https://sketchfab.com/3d-models/3538d8cd1d2e4918a3d01635baf858a5" target="_blank">sketchfab.com/3d-models/3538d8cd1d2e4918a3d01635baf858a5</a>, licensed <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank">CC BY 4.0</a>. <i>Changes:</i> simplified, textures resized and re-compressed; a copy is used as the turning top stone.</p>
+<p><b>Sky (HDRI):</b> “Kloofendal 48d Partly Cloudy (Pure Sky)” by Greg Zaal, <a href="https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky" target="_blank">Poly Haven</a>, CC0.</p>
+<p><b>Ground texture:</b> “Aerial Grass Rock” by <a href="https://polyhaven.com/a/aerial_grass_rock" target="_blank">Poly Haven</a>, CC0.</p>
+<p><b>Gears, shafts, water wheel, wind arrow, water and trees:</b> made in code for this page. Built with <a href="https://threejs.org" target="_blank">three.js</a> (MIT).</p>
+<p style="opacity:.75">Note: the inside gears are a simple drawing of how a mill like this works; the scan only shows the outside.</p></div>
+<div id="bar" class="glass">
+<button id="wind">💨 Wind ON</button>
+<label>🐢<input id="spd" type="range" min="0.2" max="3" step="0.1" value="1">🐇</label>
+<button id="turn">🧭 Turn cap to wind</button>
+<button id="peek">🔍 Peek inside</button>
+</div>
+<div id="hsl"></div>
+<script>window.onerror=(m)=>{const e=document.createElement('div');e.id='err';e.textContent='Error: '+m;document.body.appendChild(e)};
+window.ASSETS=window.ASSETS||{mill:'assets/westermolen.glb',stone:'assets/millstone.glb',hdr:'assets/kloofendal_48d_partly_cloudy_puresky_2k.hdr',grass:'assets/aerial_grass_rock_diff_1k.jpg'};</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {RGBELoader} from 'three/addons/loaders/RGBELoader.js';
+import {Water} from 'three/addons/objects/Water.js';
+const A=window.ASSETS;
+const canvas=document.getElementById('c');
+const R=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true,powerPreference:'high-performance'});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.0;R.outputColorSpace=THREE.SRGBColorSpace;R.localClippingEnabled=true;
+const S=new THREE.Scene();S.fog=new THREE.Fog(0xc9d9e8,90,420);
+const cam=new THREE.PerspectiveCamera(45,1,0.1,2000);cam.position.set(-38,10,-25);
+const ctl=new OrbitControls(cam,canvas);ctl.target.set(0,10,0);ctl.enableDamping=true;ctl.minDistance=10;ctl.maxDistance=110;ctl.maxPolarAngle=Math.PI*0.48;ctl.enablePan=false;
+const sunDir=new THREE.Vector3(-0.5,0.62,-0.6).normalize();
+const sun=new THREE.DirectionalLight(0xfff0dd,2.2);sun.position.copy(sunDir).multiplyScalar(80);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-35,right:35,top:35,bottom:-35,near:1,far:200});sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.04;S.add(sun);
+S.add(new THREE.HemisphereLight(0xdbe9ff,0x50603a,0.35));
+const lp=document.getElementById('lp');const prog={};function upd(k,e){if(e.total)prog[k]=e.loaded/e.total;const v=Object.values(prog);lp.textContent=Math.round(100*v.reduce((a,b)=>a+b,0)/4)+'%'}
+const draco=new DRACOLoader().setDecoderPath('https://unpkg.com/three@0.160.0/examples/jsm/libs/draco/gltf/');
+const gl=new GLTFLoader().setDRACOLoader(draco);
+const load=(L,u,k)=>new Promise((res,rej)=>L.load(u,res,e=>upd(k,e),rej));
+const [hdr,millG,stoneG,grassT]=await Promise.all([load(new RGBELoader(),A.hdr,'h'),load(gl,A.mill,'m'),load(gl,A.stone,'s'),load(new THREE.TextureLoader(),A.grass,'g')]);
+hdr.mapping=THREE.EquirectangularReflectionMapping;S.background=hdr;S.environment=hdr;S.backgroundIntensity=1;S.environmentIntensity=0.9;
+// ---- ground & water ----
+grassT.wrapS=grassT.wrapT=THREE.RepeatWrapping;grassT.repeat.set(90,90);grassT.colorSpace=THREE.SRGBColorSpace;grassT.anisotropy=8;
+const grass=new THREE.Mesh(new THREE.RingGeometry(27,900,96,1),new THREE.MeshStandardMaterial({map:grassT,color:0x9cc46a,roughness:1}));
+grass.rotation.x=-Math.PI/2;grass.position.y=-1.15;grass.receiveShadow=true;S.add(grass);
+{const uv=grass.geometry.attributes.uv,p=grass.geometry.attributes.position;for(let i=0;i<uv.count;i++)uv.setXY(i,p.getX(i)/1800+.5,p.getY(i)/1800+.5)}
+function waterNormals(){const N=256,h=new Float32Array(N*N),W=[];for(let i=0;i<24;i++)W.push([(1+Math.floor(Math.random()*8))*(Math.random()<.5?-1:1),(1+Math.floor(Math.random()*8))*(Math.random()<.5?-1:1),Math.random()*6.28,.3+Math.random()*.7]);
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let s=0;for(const[a,b,ph,m]of W)s+=Math.sin((a*x+b*y)/N*6.283+ph)*m/Math.hypot(a,b);h[y*N+x]=s}
+ const c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),im=g.createImageData(N,N);
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=h[y*N+(x+1)%N]-h[y*N+(x+N-1)%N],dy=h[((y+1)%N)*N+x]-h[((y+N-1)%N)*N+x];const nx=-dx*2,ny=-dy*2,l=Math.hypot(nx,ny,1),i=(y*N+x)*4;im.data[i]=(nx/l*.5+.5)*255;im.data[i+1]=(ny/l*.5+.5)*255;im.data[i+2]=(1/l*.5+.5)*255;im.data[i+3]=255}
+ g.putImageData(im,0,0);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+const water=new Water(new THREE.CircleGeometry(30,64),{textureWidth:512,textureHeight:512,waterNormals:waterNormals(),sunDirection:sunDir.clone(),sunColor:0xfff4e0,waterColor:0x2a4f5a,distortionScale:1.6,fog:true});
+water.rotation.x=-Math.PI/2;water.position.y=-1.5;water.material.uniforms.size.value=4;S.add(water);
+// reed/bank ring
+
+// distant poplars & farms
+const treeM=new THREE.MeshStandardMaterial({color:0x3f5a2c,roughness:1,flatShading:true}),trunkM=new THREE.MeshStandardMaterial({color:0x4a3a2a});
+for(let i=0;i<70;i++){const a=i/70*Math.PI*2+Math.random()*.05,r=110+Math.random()*90;const t=new THREE.Group();t.position.set(Math.cos(a)*r,-.5,Math.sin(a)*r);
+ const f=new THREE.Mesh(new THREE.IcosahedronGeometry(1,2),treeM);f.scale.set(2.2,6+Math.random()*3,2.2);f.position.y=8;t.add(f);const tr=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,4,6),trunkM);tr.position.y=2;t.add(tr);S.add(t)}
+// ---- the scanned mill ----
+const mill=millG.scene;S.add(mill);
+const Top=mill.getObjectByName('Top'),Base=mill.getObjectByName('Base'),Sails=mill.getObjectByName('Sails');
+const shellMats=[];
+mill.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;const m=o.material;if(m){m.side=THREE.DoubleSide;if(m.map)m.map.anisotropy=8;if(!shellMats.includes(m))shellMats.push(m)}}});
+Sails.traverse(o=>{if(o.isMesh){o.material=o.material.clone()}});
+const sailAxis=new THREE.Vector3(-0.97445,0.20696,-0.08724).normalize();const sailQ0=Sails.quaternion.clone();
+const ray=new THREE.Raycaster();function groundAt(x,z){ray.set(new THREE.Vector3(x,40,z),new THREE.Vector3(0,-1,0));const h=ray.intersectObject(Base,true);return h.length?h[0].point.y:0}
+// ---- inside machinery (drawn) ----
+const wood=new THREE.MeshStandardMaterial({color:0x8a6034,roughness:.8}),dark=new THREE.MeshStandardMaterial({color:0x4a3320,roughness:.85}),iron=new THREE.MeshStandardMaterial({color:0x333333,metalness:.6,roughness:.45}),peg=new THREE.MeshStandardMaterial({color:0xe2c48d,roughness:.7});
+const M=(g,m,p,parent,rot)=>{const o=new THREE.Mesh(g,m);o.castShadow=true;if(p)o.position.set(...p);if(rot)o.rotation.set(...rot);parent.add(o);return o};
+const inside=new THREE.Group();inside.visible=false;Top.add(inside);
+const hub=Sails.position.clone();
+// windshaft (inside Top local frame)
+const wsLen=6.5;const ws=new THREE.Group();ws.position.copy(hub);ws.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),sailAxis.clone().negate());inside.add(ws);
+M(new THREE.CylinderGeometry(.32,.32,wsLen,12),dark,[0,0,wsLen/2],ws,[Math.PI/2,0,0]);
+const brake=new THREE.Group();brake.position.z=4.1;ws.add(brake);
+M(new THREE.TorusGeometry(1.35,.2,8,32),wood,null,brake);for(let i=0;i<4;i++)M(new THREE.BoxGeometry(2.7,.18,.18),wood,[0,0,0],brake,[0,0,i*Math.PI/4]);
+for(let i=0;i<32;i++){const a=i/32*Math.PI*2;M(new THREE.BoxGeometry(.13,.13,.45),peg,[Math.cos(a)*1.35,Math.sin(a)*1.35,.3],brake)}
+const bwWorld=new THREE.Vector3();brake.updateWorldMatrix(true,false);
+// wallower + vertical shaft at post axis (x=0,z=0 local of Top)
+const wall=new THREE.Group();inside.add(wall);
+M(new THREE.CylinderGeometry(.6,.6,.5,14),wood,null,wall);for(let i=0;i<12;i++){const a=i/12*Math.PI*2;M(new THREE.CylinderGeometry(.07,.07,.65,6),peg,[Math.cos(a)*.6,0,Math.sin(a)*.6],wall)}
+const vshaft=new THREE.Group();inside.add(vshaft);
+// place after load
+function placeGears(){const p=new THREE.Vector3();brake.getWorldPosition(p);Top.worldToLocal(p);wall.position.set(p.x+1.25,p.y-1.35,p.z);
+ const top=wall.position.y,bot=1.2;vshaft.position.set(wall.position.x,(top+bot)/2,wall.position.z);vshaft.clear();M(new THREE.CylinderGeometry(.2,.2,top-bot,10),dark,null,vshaft);
+ for(let y=-(top-bot)/2+1;y<(top-bot)/2;y+=2.2)M(new THREE.BoxGeometry(.5,.12,.5),iron,[0,y,0],vshaft)}
+placeGears();
+// bottom: crown wheel + water wheel (in Base frame -> scene)
+const lower=new THREE.Group();lower.visible=false;S.add(lower);
+const crown=new THREE.Group();crown.position.set(wall.position.x,1.3,0);lower.add(crown);
+M(new THREE.CylinderGeometry(.9,.9,.3,20),wood,null,crown);for(let i=0;i<16;i++){const a=i/16*Math.PI*2;M(new THREE.BoxGeometry(.12,.35,.12),peg,[Math.cos(a)*.9,.25,Math.sin(a)*.9],crown)}
+const hshaft=M(new THREE.CylinderGeometry(.18,.18,7,10),dark,[wall.position.x,1.8,3.5],lower,[Math.PI/2,0,0]);
+const scoop=new THREE.Group();scoop.position.set(wall.position.x,1.8,7.2);lower.add(scoop);
+M(new THREE.TorusGeometry(2.6,.12,6,32),wood,null,scoop);M(new THREE.TorusGeometry(1.0,.12,6,24),wood,null,scoop);
+for(let i=0;i<12;i++){const a=i/12*Math.PI*2;const pd=M(new THREE.BoxGeometry(.9,.08,.6),wood,[Math.cos(a)*2.2,Math.sin(a)*2.2,0],scoop,[0,0,a]);M(new THREE.BoxGeometry(2.0,.1,.1),wood,[Math.cos(a)*1.6,Math.sin(a)*1.6,0],scoop,[0,0,a])}
+const trough=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.4),new THREE.MeshStandardMaterial({color:0x2c6f8f,roughness:.15,metalness:.1,transparent:true,opacity:.8}));trough.position.set(wall.position.x,0.3,7.2);lower.add(trough);
+const lamp=new THREE.PointLight(0xffd29a,30,14,1.5);lamp.position.set(0,11,0);inside.add(lamp);
+// ---- scanned millstone + runner ----
+const stoneSpot=new THREE.Vector3(-13,0,9);stoneSpot.y=groundAt(stoneSpot.x,stoneSpot.z);
+const stone=stoneG.scene;stone.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}});
+const sb=new THREE.Box3().setFromObject(stone);const sc=2.2/Math.max(sb.max.x-sb.min.x,sb.max.z-sb.min.z);stone.scale.setScalar(sc);
+const sGroup=new THREE.Group();sGroup.position.copy(stoneSpot);S.add(sGroup);stone.position.y=-sb.min.y*sc-0.05;sGroup.add(stone);
+const runner=stone.clone(true);runner.visible=false;runner.position.y=stone.position.y+(sb.max.y-sb.min.y)*sc*0.9;sGroup.add(runner);
+const PN=240,pg=new THREE.BufferGeometry(),pp=new Float32Array(PN*3),pc=new Float32Array(PN*3),life=Array.from({length:PN},Math.random);
+pg.setAttribute('position',new THREE.BufferAttribute(pp,3));pg.setAttribute('color',new THREE.BufferAttribute(pc,3));
+const parts=new THREE.Points(pg,new THREE.PointsMaterial({size:.07,vertexColors:true}));parts.visible=false;sGroup.add(parts);
+const stoneTop=runner.position.y+(sb.max.y-sb.min.y)*sc;
+// ---- wind arrow & streaks ----
+const arrow=new THREE.Group();S.add(arrow);
+const am=new THREE.MeshStandardMaterial({color:0x38bdf8,emissive:0x0b4f7a,emissiveIntensity:.7,roughness:.3,transparent:true,opacity:.9});
+M(new THREE.CylinderGeometry(.3,.3,6,12),am,[0,0,0],arrow,[0,0,Math.PI/2]);const ah=M(new THREE.ConeGeometry(.9,2,16),am,[4,0,0],arrow,[0,0,-Math.PI/2]);
+const streaks=[],sMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.4,depthWrite:false});
+for(let i=0;i<16;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(3+Math.random()*3,.05,.05),sMat);s.userData={o:Math.random()*24-12,y:4+Math.random()*20,t:Math.random()};S.add(s);streaks.push(s)}
+// wind comes FROM direction angle a: from-vector (-cos a,0,sin a). Mill front faces -X at cap angle 0.
+let windAng=0,capAng=0,capTarget=0,windOn=true,spd=1,sailRot=0,peek=false;
+const fromVec=a=>new THREE.Vector3(-Math.cos(a),0,Math.sin(a));
+function placeArrow(){const f=fromVec(windAng);arrow.position.copy(f.clone().multiplyScalar(26)).setY(27);arrow.rotation.y=windAng+Math.PI}placeArrow();
+// ---- clipping for peek ----
+const cp1=new THREE.Plane(),cp2=new THREE.Plane(new THREE.Vector3(0,-1,0),1.0),cp3=new THREE.Plane();
+function setPeek(v){peek=v;inside.visible=lower.visible=runner.visible=parts.visible=v;shellMats.forEach(m=>{m.clippingPlanes=v?[cp1,cp2,cp3]:null;m.clipIntersection=true;m.clipShadows=true;m.needsUpdate=true});
+ $('peek').textContent=v?'🏠 Close up':'🔍 Peek inside';refreshHS()}
+const $=id=>document.getElementById(id);
+$('wind').onclick=()=>{windOn=!windOn;$('wind').textContent=windOn?'💨 Wind ON':'🍃 Wind OFF';$('wind').classList.toggle('off',!windOn)};
+$('spd').oninput=e=>spd=+e.target.value;$('peek').onclick=()=>setPeek(!peek);
+$('turn').onclick=()=>{windAng+=(Math.PI/2)*(1+Math.floor(Math.random()*2));placeArrow();show('🧭','The Wind Changed!','Uh-oh, the wind moved! Watch the miller push the long tail to turn the top of the mill, so the sails face the wind again.');setTimeout(()=>capTarget=windAng,1200)};
+function show(e,h,b){$('ch').innerHTML='<span>'+e+'</span>'+h;$('cb').textContent=b;$('card').classList.add('on')}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.parentNode.classList.remove('on'));
+$('credBtn').onclick=()=>$('credits').classList.add('on');
+const HS=[
+ {e:'🌀',w:'Sails',obj:Sails,off:[0,7,0],h:'The Sails',t:'Four big sails catch the wind. The wind pushes them, and they spin round and round!'},
+ {e:'🏠',w:'Turning top',obj:Top,local:[0,25.5,0],h:'The Top Turns!',t:'The whole top of this mill can turn around, so the sails can always face the wind.'},
+ {e:'🪜',w:'Tail & ladder',obj:Top,local:[7.2,4.5,0],h:'The Tail and Ladder',t:'The miller climbs this ladder. He pushes the long tail to turn the mill toward the wind.'},
+ {e:'🧭',w:'Wind',obj:arrow,off:[0,2,0],h:'The Wind',t:'The blue arrow shows where the wind blows. Tap "Turn cap to wind" to change it!'},
+ {e:'⚙️',w:'Gears',obj:brake,off:[0,1.8,0],h:'The Gears',t:'The big brake wheel turns the little wallower gear. Their wooden teeth fit together like fingers!',inside:true},
+ {e:'📏',w:'Long shaft',obj:vshaft,off:[0,-2,0],h:'The Long Shaft',t:'A tall pole goes down through the middle of the mill. It carries the turning power to the bottom.',inside:true},
+ {e:'🛞',w:'Water wheel',obj:scoop,off:[0,3.2,0],h:'The Water Wheel',t:'At the bottom, a wheel scoops up water and pushes it into a higher canal. Splash!',inside:true},
+ {e:'🌾',w:'Millstone',obj:sGroup,off:[0,2.4,0],h:'A Real Millstone',t:'This is a real old millstone! In grain mills, two heavy stones grind wheat into soft flour for bread.'},
+ {e:'💧',w:'Dry land',obj:water,off:[-22,1.5,-18],h:'Keeping Land Dry',t:'Much of Holland is lower than the sea! Mills like this one pumped water away to keep the fields (polders) dry.'},
+];
+const hsl=$('hsl');
+HS.forEach(h=>{const d=document.createElement('div');d.className='hs';d.innerHTML='<i>'+h.e+'</i><s>'+h.w+'</s>';d.addEventListener('pointerup',ev=>{ev.stopPropagation();show(h.e,h.h,h.t)});hsl.appendChild(d);h.el=d});
+function refreshHS(){HS.forEach(h=>h.el.classList.toggle('hide',!!h.inside&&!peek))}refreshHS();
+const v=new THREE.Vector3();
+function updHS(){HS.forEach(h=>{if(h.inside&&!peek)return;if(h.local){v.set(...h.local);h.obj.localToWorld(v)}else{h.obj.getWorldPosition(v);v.x+=h.off[0];v.y+=h.off[1];v.z+=h.off[2]}v.project(cam);
+ const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;h.el.style.display=vis?'':'none';h.el.style.left=((v.x+1)/2*innerWidth)+'px';h.el.style.top=((1-v.y)/2*innerHeight)+'px'})}
+function resize(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.fov=cam.aspect<1?60:45;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+window.__cam=(p,t)=>{cam.position.set(...p);ctl.target.set(...t);ctl.update()};window.__peek=setPeek;
+$('load').remove();
+const clock=new THREE.Clock(),q=new THREE.Quaternion(),tmp=new THREE.Vector3();
+function loop(){const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+ const dd=Math.atan2(Math.sin(capTarget-capAng),Math.cos(capTarget-capAng));capAng+=dd*Math.min(1,dt*.7);Top.rotation.y=capAng;
+ const facing=Math.cos(capAng-windAng);const w=windOn?spd*Math.max(0,facing):0;
+ sailRot+=w*dt*1.1;q.setFromAxisAngle(sailAxis,sailRot);Sails.quaternion.copy(q).multiply(sailQ0);brake.rotation.z=sailRot;
+ const r2=sailRot*2.4;wall.rotation.y=-r2;vshaft.rotation.y=-r2;crown.rotation.y=-r2;crown.position.x=wall.position.x;scoop.rotation.z=r2*.6;
+ lower.rotation.y=capAng*0; // lower machinery stays with base
+ runner.rotation.y=r2*.8;
+ if(peek){for(let i=0;i<PN;i++){if(w>0)life[i]+=dt*.4*(.5+w);if(life[i]>1)life[i]-=1;const f=life[i],j=i*3,a=i*2.39;
+   if(i%2==0){pp[j]=Math.cos(a)*.1*(1-f);pp[j+1]=stoneTop+1.2-f*1.2;pp[j+2]=Math.sin(a)*.1*(1-f);pc[j]=.85;pc[j+1]=.65;pc[j+2]=.25}
+   else{const rr=1.1+f*.5;pp[j]=Math.cos(a+f*3)*rr;pp[j+1]=runner.position.y+.1+f*.4*Math.abs(Math.sin(a*3));pp[j+2]=Math.sin(a+f*3)*rr;pc[j]=pc[j+1]=pc[j+2]=1}}
+  pg.attributes.position.needsUpdate=pg.attributes.color.needsUpdate=true;
+  tmp.set(cam.position.x,0,cam.position.z).normalize();cp1.normal.copy(tmp).negate();cp1.constant=0.3;cp3.normal.copy(tmp);cp3.constant=-9}
+ water.material.uniforms.time.value+=dt*(windOn?.3+spd*.25:.15);
+ streaks.forEach(s=>{if(!windOn){s.visible=false;return}s.visible=true;const u=(s.userData.t+=dt*.22*spd)%1;const f=fromVec(windAng),side=new THREE.Vector3(-f.z,0,f.x);
+  s.position.copy(f).multiplyScalar(30-u*60).addScaledVector(side,s.userData.o).setY(s.userData.y);s.rotation.y=windAng;s.material.opacity=.4*Math.sin(u*Math.PI)});
+ ah.position.x=4+Math.sin(t*4)*.3*(windOn?1:0);
+ ctl.update();R.render(S,cam);updHS();requestAnimationFrame(loop)}
+loop();window.__ready=true;
+</script>
+</body></html>
