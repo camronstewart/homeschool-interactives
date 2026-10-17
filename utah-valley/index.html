@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#b9cfe3"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>Utah Valley in 3D · real mountains, real lidar</title>
+<meta name="description" content="Fly around the mountains of Utah Valley in 3D, built from real USGS lidar elevation and real aerial imagery.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M4 54 26 14l10 18 8-10 16 32z' fill='%235b7c99'/%3E%3Cpath d='M26 14l-6 10 6-3 4 5 6-6z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{--glass:rgba(255,255,255,.62);--ink:#1b2733;--accent:#b4430f;--bar:68px;--sab:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Nunito","Avenir Next","Segoe UI Rounded","Segoe UI",system-ui,-apple-system,sans-serif;background:#b9cfe3;color:var(--ink);overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#c{position:fixed;inset:0;touch-action:none;width:100%;height:100%;display:block}
+.glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.5);-webkit-backdrop-filter:blur(14px) saturate(1.5);border:1px solid rgba(255,255,255,.7);box-shadow:0 8px 28px rgba(15,35,60,.28)}
+#title{position:fixed;top:max(10px,env(safe-area-inset-top));left:12px;padding:8px 16px 8px 14px;border-radius:16px;pointer-events:none;z-index:3;line-height:1.15}
+#title b{display:block;font-size:clamp(17px,2.2vw,26px);letter-spacing:.2px}
+#title span{font-size:clamp(11.5px,1.2vw,14px);opacity:.75}
+#top-r{position:fixed;top:max(10px,env(safe-area-inset-top));right:12px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:3}
+#credBtn{background:rgba(20,30,45,.5);color:#fff;border:none;border-radius:14px;padding:0 14px;height:38px;font:inherit;font-weight:800;font-size:15px;cursor:pointer}
+#compass{width:52px;height:52px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
+#compass svg{transition:none;will-change:transform}
+#scale{position:fixed;left:14px;bottom:calc(var(--bar) + 18px + var(--sab));z-index:3;font-size:12.5px;font-weight:800;padding:5px 9px 6px;border-radius:10px;pointer-events:none}
+#scale i{display:block;height:6px;border:2px solid var(--ink);border-top:none;margin-bottom:2px;width:80px}
+#legend{position:fixed;left:14px;bottom:calc(var(--bar) + 70px + var(--sab));z-index:3;font-size:11.5px;font-weight:800;padding:6px 9px;border-radius:10px;display:none;pointer-events:none}
+#legend.on{display:block}
+#legend i{display:block;height:9px;width:132px;border-radius:5px;margin:3px 0 2px;background:linear-gradient(90deg,#2f6b3a,#7fae49,#d3c867,#c8a46a,#8f6b4a,#a9a29b,#fff)}
+#legend div{display:flex;justify-content:space-between}
+#bar{position:fixed;bottom:calc(10px + var(--sab));left:50%;transform:translateX(-50%);display:flex;gap:4px;align-items:center;padding:5px 7px;border-radius:999px;z-index:6;background:rgba(255,255,255,.5);max-width:calc(100vw - 14px)}
+#bar.min>*:not(#tog){display:none}
+.ib{width:44px;height:44px;min-height:0;padding:0;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.3);color:#fff;flex:none}
+.ib:active{transform:translateY(1px)}
+.ib svg{width:23px;height:23px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.ib.on{outline:3px solid rgba(255,255,255,.95);outline-offset:-1px}
+.ib::after{content:attr(data-tip);position:absolute;bottom:54px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;background:rgba(0,0,0,.72);color:#fff;padding:3px 8px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .15s}
+@media (hover:hover){.ib:hover::after{opacity:1}}
+#bFly{background:linear-gradient(#38bdf8,#0369a1)}#bHere{background:linear-gradient(#f87171,#b91c1c)}#bSun{background:linear-gradient(#fbbf24,#d97706)}
+#bSeason{background:linear-gradient(#a5b4fc,#4f46e5)}#bLayers{background:linear-gradient(#34d399,#047857)}#bBonn{background:linear-gradient(#22d3ee,#0e7490)}
+#bLab{background:linear-gradient(#a78bfa,#6d28d9)}#tog{background:rgba(20,30,45,.5)}
+@media (max-width:430px){.ib{width:39px;height:39px}.ib svg{width:21px;height:21px}#bar{gap:3px;padding:5px 6px}:root{--bar:62px}}
+@media (min-width:1500px){.ib{width:54px;height:54px}.ib svg{width:27px;height:27px}:root{--bar:78px}}
+.panel{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bar) + 16px + var(--sab));width:min(94vw,380px);border-radius:22px;padding:14px 16px 16px;z-index:5;display:none;max-height:58vh;overflow:auto;-webkit-overflow-scrolling:touch;background:rgba(255,255,255,.72)}
+.panel.on{display:block}
+.panel h3{margin:0 0 8px;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+.panel .row{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:14px;font-weight:700}
+.panel .row b{min-width:84px}
+.panel input[type=range]{flex:1;height:34px;accent-color:#d97706;min-width:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:none;border-radius:12px;padding:8px 11px;font:inherit;font-weight:800;font-size:14px;background:rgba(30,50,80,.1);color:var(--ink);cursor:pointer;min-height:40px}
+.chip.on{background:#1d4ed8;color:#fff}
+.chip:active{transform:translateY(1px)}
+.flyg{margin:2px 0 10px}.flyg small{display:block;font-weight:900;font-size:12px;letter-spacing:.8px;text-transform:uppercase;opacity:.6;margin:6px 0 5px}
+#cardWrap{position:fixed;z-index:7;display:none}
+.card{position:fixed;z-index:7;display:none;border-radius:24px;padding:16px 18px 16px;line-height:1.42;font-size:15.5px;background:rgba(255,255,255,.9);right:16px;bottom:calc(var(--bar) + 18px + var(--sab));width:min(400px,calc(100vw - 32px));max-height:calc(100vh - var(--bar) - 130px);overflow:auto;-webkit-overflow-scrolling:touch;-webkit-user-select:text;user-select:text}
+.card.on{display:block;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.card h2{margin:0 36px 6px 0;color:var(--accent);font-size:19px;line-height:1.2;display:flex;align-items:flex-start;gap:9px}
+.card h2 .em{font-size:22px}
+.card p{margin:0 0 8px}
+.card .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;font-size:17px;font-weight:800;cursor:pointer}
+.card .acts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 6px}
+.card .src{font-size:12px;opacity:.78;line-height:1.5}.card .src a{color:#0b5c8f}
+.btn{border:none;border-radius:13px;padding:0 14px;height:40px;font:inherit;font-weight:800;font-size:14px;color:#fff;cursor:pointer;background:linear-gradient(#38bdf8,#0369a1);box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.btn.o{background:linear-gradient(#fb923c,#c2410c)}
+@media (max-width:700px){.card{left:8px;right:8px;width:auto;bottom:calc(var(--bar) + 12px + var(--sab));max-height:46vh;font-size:15px;border-radius:22px}}
+#credits{width:min(92vw,720px);left:50%;top:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);max-height:84vh;font-size:13.5px}
+#credits.on{animation:none}
+#credits h2{font-size:22px}#credits h4{margin:14px 0 4px;font-size:14px;text-transform:uppercase;letter-spacing:.7px;color:#334155}
+#credits a{color:#0b5c8f;word-break:break-word}#credits li{margin:3px 0}#credits ul{padding-left:18px;margin:4px 0}
+.hs{position:fixed;left:0;top:0;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;-webkit-user-select:none;z-index:2;transform-origin:50% 12px;will-change:transform,opacity}
+.hs::before{content:"";position:absolute;left:50%;top:12px;width:44px;height:44px;transform:translate(-50%,-50%);border-radius:50%}
+#hsl.off{display:none}
+.hs i{font-style:normal;width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;background:rgba(255,255,255,.58);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:2px solid rgba(255,255,255,.92);box-shadow:0 0 0 0 rgba(251,191,36,.7),0 2px 6px rgba(0,0,0,.35);animation:p 2.8s infinite}
+.hs.peak i{background:rgba(60,70,90,.72);color:#fff;font-size:11px;border-color:rgba(255,255,255,.9);animation-name:p2}
+.hs.here i{background:rgba(220,38,38,.9);border-color:#fff;width:29px;height:29px;font-size:15px;animation-name:p3}
+.hs s{text-decoration:none;margin-top:3px;font-size:12.5px;font-weight:800;background:rgba(255,255,255,.9);padding:1px 7px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;color:var(--ink)}
+.hs small{font-weight:700;opacity:.65;margin-left:4px;font-size:11px}
+.hs:hover s,.hs.near s,.hs.tap s,.hs.here s{opacity:1}
+.hs.hide{display:none!important}
+.hs.occ{opacity:.35}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(251,191,36,.85),0 2px 6px rgba(0,0,0,.35)}70%{box-shadow:0 0 0 9px rgba(251,191,36,0),0 2px 6px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0),0 2px 6px rgba(0,0,0,.35)}}
+@keyframes p2{0%{box-shadow:0 0 0 0 rgba(255,255,255,.8),0 2px 6px rgba(0,0,0,.35)}70%{box-shadow:0 0 0 8px rgba(255,255,255,0),0 2px 6px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0),0 2px 6px rgba(0,0,0,.35)}}
+@keyframes p3{0%{box-shadow:0 0 0 0 rgba(239,68,68,.9),0 2px 6px rgba(0,0,0,.4)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0),0 2px 6px rgba(0,0,0,.4)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0),0 2px 6px rgba(0,0,0,.4)}}
+#load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:20;text-align:center;padding:24px;background:radial-gradient(120% 90% at 50% 20%,#d7e6f4,#9db9d3 70%,#7e9cb8);transition:opacity .6s}
+#load.gone{opacity:0;pointer-events:none}
+#load .logo{font-size:54px;margin-bottom:2px}
+#load h1{margin:0;font-size:clamp(24px,5vw,38px)}
+#load p{margin:0;max-width:440px;font-size:15px;opacity:.82;min-height:44px}
+#lbar{width:min(300px,70vw);height:10px;border-radius:6px;background:rgba(255,255,255,.55);overflow:hidden;margin-top:8px}
+#lbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0ea5e9,#16a34a);border-radius:6px;transition:width .25s}
+#lp{font-size:13px;opacity:.7}
+#toast{position:fixed;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 64px);transform:translateX(-50%);z-index:8;padding:8px 16px;border-radius:14px;font-weight:800;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+#err{position:fixed;top:0;left:0;right:0;color:#b91c1c;background:#fff;font-size:13px;z-index:30;padding:4px 8px}
+#viewer{position:fixed;inset:0;z-index:12;display:none;background:rgba(10,20,35,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#viewer.on{display:block}
+#vbox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(94vw,820px);height:min(78vh,620px);border-radius:24px;overflow:hidden;background:linear-gradient(#cfe0ef,#8fb0cc)}
+#vc{width:100%;height:100%;display:block;touch-action:none}
+#vcap{position:absolute;left:12px;right:60px;bottom:10px;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.75);padding:6px 10px;border-radius:12px;line-height:1.35}
+#vcap a{color:#0b5c8f}
+#vx{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:18px;font-weight:800;cursor:pointer}
+#vhint{position:absolute;top:14px;left:14px;font-size:13px;font-weight:800;background:rgba(255,255,255,.7);padding:5px 10px;border-radius:10px}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<canvas id="c"></canvas>
+<div id="load"><div class="logo">🏔️</div><h1>Utah Valley in 3D</h1><p id="ltip">Building real mountains from lidar…</p><div id="lbar"><i id="lfill"></i></div><div id="lp">Starting…</div></div>
+<div id="title" class="glass"><b>🏔️ Utah Valley in 3D</b><span>Real USGS lidar + aerial photos · tap the dots!</span></div>
+<div id="top-r"><button id="credBtn">ⓘ Credits</button><div id="compass" class="glass" title="Tap to face north"><svg id="needle" width="38" height="38" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17.5" fill="none" stroke="rgba(30,40,55,.35)" stroke-width="1.5"/><path d="M20 4l5.2 16H14.8z" fill="#dc2626"/><path d="M20 36l-5.2-16h10.4z" fill="#475569"/><text x="20" y="14" text-anchor="middle" font-size="7.5" font-weight="900" fill="#fff" font-family="system-ui">N</text></svg></div></div>
+<div id="legend" class="glass"><div><span>4,150 ft</span><span>11,900 ft</span></div><i></i><div><span>valley</span><span>peaks</span></div></div>
+<div id="scale" class="glass"><i id="sbar"></i><span id="stxt">5 km</span></div>
+<div id="toast" class="glass"></div>
+<div id="hsl"></div>
+
+<div id="panFly" class="panel glass"><h3>✈️ Fly to… <button class="chip" data-closep>✕</button></h3><div id="flyList"></div></div>
+<div id="panSun" class="panel glass"><h3>☀️ Sun &amp; season <button class="chip" data-closep>✕</button></h3>
+ <div class="row"><b id="sunLab">4:00 PM</b><input id="sunSl" type="range" min="0" max="1000" value="620" aria-label="Time of day"></div>
+ <div style="font-size:12.5px;opacity:.75;margin:-4px 0 6px" id="sunInfo"></div>
+ <div class="seg" id="seasonSeg"><button class="chip" data-s="summer">☀️ Summer</button><button class="chip" data-s="fall">🍂 Fall</button><button class="chip" data-s="winter">❄️ Winter</button><button class="chip" data-s="spring">🌱 Spring</button></div>
+ <div style="font-size:12.5px;opacity:.75;margin-top:8px" id="seasonInfo"></div></div>
+<div id="panLay" class="panel glass"><h3>⛰️ Terrain &amp; layers <button class="chip" data-closep>✕</button></h3>
+ <div class="row"><b id="exLab">1.6× tall</b><input id="exSl" type="range" min="1" max="3" step="0.05" value="1.6" aria-label="Vertical exaggeration"></div>
+ <div class="seg" id="laySeg"><button class="chip on" data-l="aerial">📷 Aerial photo</button><button class="chip" data-l="ramp">🌈 Elevation colors</button></div>
+ <div class="seg" style="margin-top:8px"><button class="chip" id="contBtn">〰️ Contour lines</button><button class="chip" id="shadBtn">🌒 Shadows</button></div>
+ <div style="font-size:12.5px;opacity:.75;margin-top:8px">Contours are every 100 m (heavier every 500 m). Elevation colors run from valley floor to the highest peaks.</div></div>
+<div id="panBonn" class="panel glass"><h3>🌊 Lake Bonneville <button class="chip" data-closep>✕</button></h3>
+ <div class="seg"><button class="chip" id="bonnTog">Flood the valley</button><button class="chip" id="benchBtn">✨ Show old shorelines</button></div>
+ <div class="row"><b id="bonnLab">4,489 ft</b><input id="bonnSl" type="range" min="1371" max="1560" step="1" value="1371" aria-label="Lake level"></div>
+ <div style="font-size:12.5px;opacity:.78" id="bonnInfo">Today’s Utah Lake is 4,489 ft. Lake Bonneville’s highest level was about 5,090 ft: the flat “benches” you see on the mountainsides are its old beaches.</div></div>
+
+<div id="card" class="card glass"><button class="x" data-closec aria-label="Close">✕</button><h2><span class="em" id="cE"></span><span id="cH"></span></h2><div id="cB"></div><div class="acts" id="cA"></div><div class="src" id="cS"></div></div>
+<div id="credits" class="card glass"><button class="x" data-closec aria-label="Close">✕</button><h2>Credits &amp; Sources</h2><div id="credBody"></div></div>
+<div id="viewer"><div id="vbox"><canvas id="vc"></canvas><div id="vhint">Drag to spin · pinch to zoom</div><div id="vcap"></div><button id="vx" aria-label="Close">✕</button></div></div>
+
+<div id="bar" class="glass">
+ <button id="bFly" class="ib" data-tip="Fly to…" aria-label="Fly to"><svg viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2-8z"/></svg></button>
+ <button id="bHere" class="ib" data-tip="You are here: Spanish Fork" aria-label="You are here, Spanish Fork"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></button>
+ <button id="bSun" class="ib" data-tip="Sun & time" aria-label="Sun and time of day"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg></button>
+ <button id="bSeason" class="ib" data-tip="Season & snow" aria-label="Season and snow"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 2.5L15 4M9 20l3-2.5 3 2.5"/></svg></button>
+ <button id="bLayers" class="ib" data-tip="Terrain & layers" aria-label="Terrain and layers"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5zM3 12.5l9 5 9-5M3 16.8l9 5 9-5"/></svg></button>
+ <button id="bBonn" class="ib" data-tip="Lake Bonneville" aria-label="Lake Bonneville"><svg viewBox="0 0 24 24"><path d="M2 9c2.5-2.6 5-2.6 7.5 0s5 2.6 7.5 0c1.8-1.8 3.5-2.4 5-1.7M2 14.5c2.5-2.6 5-2.6 7.5 0s5 2.6 7.5 0c1.8-1.8 3.5-2.4 5-1.7M2 20c2.5-2.6 5-2.6 7.5 0s5 2.6 7.5 0c1.8-1.8 3.5-2.4 5-1.7"/></svg></button>
+ <button id="bLab" class="ib" data-tip="Hide info dots" aria-label="Show or hide info dots"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6M12 7.2v.1"/></svg></button>
+ <button id="tog" class="ib" data-tip="Hide buttons" aria-label="Hide or show buttons"><svg viewBox="0 0 24 24" stroke-width="2.8"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+</div>
+<script>window.onerror=function(m,s,l,c,e){var d=document.createElement('div');d.id='err';d.textContent='Error: '+m+' ('+(s||'').split('/').pop()+':'+l+')';document.body.appendChild(d)};</script>
+<script type="module" src="app.js"></script>
+</body></html>
