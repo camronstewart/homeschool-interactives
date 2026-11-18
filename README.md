@@ -2,6 +2,7 @@
 
 Interactive learning pages for our family homeschool.
 
+- **[Journey to the Center of the Earth](https://camronstewart.github.io/homeschool-interactives/earth-layers/)**: Swipe down from a Utah canyon through soil, fossils, bedrock, crust and mantle to the iron core, finding something at every layer. Photo credits are in the page footer.
 - **[Liberty Village, 1774](https://camronstewart.github.io/homeschool-interactives/colonial-town/)**: Drag the blacksmith, printer, Paul Revere the silversmith, cooper, farmer, miller and weaver to their shops on an old-style village map and learn how families got by without stores. Photo credits are in the page footer.
 - **[Rock Detective Lab](https://camronstewart.github.io/homeschool-interactives/rock-lab/)**: Eight real Utah rocks to test like a geologist: magnify, scratch, drip vinegar, then sort them into igneous, sedimentary and metamorphic. Includes a Utah rock-hunt field guide. Photo credits are in the page footer.
 - **[Liberty Hall, 1776](https://camronstewart.github.io/homeschool-interactives/liberty-hall/)**: Step into 1776 Philadelphia: ring the Liberty Bell, peek into the Assembly Room, meet Washington, Franklin and Jefferson, and sign your name with a quill next to John Hancock. Photo credits are in the page footer.
