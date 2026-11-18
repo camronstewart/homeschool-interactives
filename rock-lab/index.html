@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1d2a2a">
+<title>Rock Detective Lab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%AA%A8%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="kicker">Spanish Fork Field Station</span><h1>Rock Detective Lab</h1></div>
+    <div class="tabs"><button class="tab on" data-tab="lab">Lab bench</button><button class="tab" data-tab="guide">Field guide</button></div>
+    <div class="score" id="score" title="Rocks sorted"><span id="scoreN">0</span>/8 sorted</div>
+  </header>
+
+  <main id="lab" class="view on">
+    <aside class="drawer" id="drawer" aria-label="Specimen drawer"></aside>
+
+    <section class="bench">
+      <div class="mat" id="mat">
+        <div class="mat-grid"></div>
+        <div class="specimen" id="specimen"><img id="specImg" alt="" draggable="false"></div>
+        <canvas id="fx"></canvas>
+        <div class="loupe" id="loupe"><div class="loupe-glass" id="loupeGlass"></div><div class="loupe-handle"></div></div>
+        <div class="dropper" id="dropper"><svg viewBox="0 0 60 160"><defs><linearGradient id="gl" x1="0" x2="1"><stop offset="0" stop-color="#dfe9ea" stop-opacity=".9"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#b8c8ca" stop-opacity=".9"/></linearGradient></defs><rect x="14" y="0" width="32" height="54" rx="14" fill="#3b3f46"/><rect x="18" y="50" width="24" height="80" rx="4" fill="url(#gl)" stroke="#8aa" stroke-width="1"/><rect x="20" y="88" width="20" height="40" fill="#f5efd6" opacity=".55"/><path d="M22 130h16l-5 26h-6z" fill="url(#gl)" stroke="#8aa"/></svg></div>
+        <div class="mat-msg" id="matMsg">Pick a rock from the drawer</div>
+        <div class="name-tag" id="nameTag"></div>
+      </div>
+      <div class="toolbar" id="toolbar">
+        <button class="tool on" data-tool="look"><span class="ti"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span><span>Move</span></button>
+        <button class="tool" data-tool="magnify"><span class="ti"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15 15l6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span><span>Magnify</span></button>
+        <button class="tool" data-tool="scratch"><span class="ti"><svg viewBox="0 0 24 24"><path d="M4 20L18 6" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M16 4l4 4" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span><span>Scratch</span></button>
+        <button class="tool" data-tool="vinegar"><span class="ti"><svg viewBox="0 0 24 24"><path d="M12 3c3 5 6 8 6 12a6 6 0 01-12 0c0-4 3-7 6-12z" fill="currentColor"/></svg></span><span>Vinegar</span></button>
+        <div class="scratchers" id="scratchers">
+          <button class="sc on" data-h="2.5" data-n="fingernail">Fingernail</button>
+          <button class="sc" data-h="3.5" data-n="copper penny">Penny</button>
+          <button class="sc" data-h="5.5" data-n="steel nail">Steel nail</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="notebook paper" id="notebook">
+      <h2 id="nbTitle">Detective notebook</h2>
+      <div class="clues" id="clues">
+        <div class="clue" id="cLook"><b>Look</b><span>?</span></div>
+        <div class="clue" id="cScratch"><b>Hardness</b><span>?</span></div>
+        <div class="clue" id="cFizz"><b>Vinegar</b><span>?</span></div>
+      </div>
+      <div class="sort-q">How was this rock made?</div>
+      <div class="bins" id="bins">
+        <button class="bin igneous" data-type="igneous"><i></i><b>Igneous</b><small>made by fire</small></button>
+        <button class="bin sedimentary" data-type="sedimentary"><i></i><b>Sedimentary</b><small>made in layers</small></button>
+        <button class="bin metamorphic" data-type="metamorphic"><i></i><b>Metamorphic</b><small>changed by squeeze &amp; heat</small></button>
+      </div>
+      <p class="tip" id="tip">Tip: drag the rock onto a box, or tap a box.</p>
+    </aside>
+  </main>
+
+  <main id="guide" class="view" aria-label="Field guide">
+    <div class="guide-head"><h2>Utah Rock Hunt</h2><p>Take this on a walk, a canyon hike, or to the creek. Tap <b>I found one!</b> when you spot a rock in real life.</p><div class="found-count" id="foundCount"></div></div>
+    <div class="guide-grid" id="guideGrid"></div>
+  </main>
+
+  <section class="modal" id="modal" aria-hidden="true"><div class="modal-card paper" id="modalCard"></div></section>
+  <div class="toast" id="toast"></div>
+  <button class="credits-link" id="creditsBtn">Photo credits</button>
+</div>
+<script src="credits.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2a1d12">
+<title>Liberty Bell &amp; Independence Hall</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%94%94%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="viewport">
+    <div id="stage">
+      <img id="sceneImg" alt="Independence Hall" draggable="false">
+      <div id="hotspots"></div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="title">
+      <span class="kicker">Philadelphia · Summer 1776</span>
+      <h1>Independence Hall</h1>
+    </div>
+    <div class="seg" role="tablist">
+      <button class="seg-btn on" data-view="1778">1778 print</button>
+      <button class="seg-btn" data-view="today">Today</button>
+    </div>
+  </header>
+
+  <div class="hint" id="hint">Tap a glowing circle to explore</div>
+
+  <nav class="dock">
+    <button class="dock-btn person" data-person="washington"><img src="assets/washington.jpg" alt=""><span>Washington</span></button>
+    <button class="dock-btn person" data-person="franklin"><img src="assets/franklin.jpg" alt=""><span>Franklin</span></button>
+    <button class="dock-btn person" data-person="jefferson"><img src="assets/jefferson.jpg" alt=""><span>Jefferson</span></button>
+    <button class="dock-btn quill" id="dockSign"><svg viewBox="0 0 64 64" aria-hidden="true"><use href="#i-quill"/></svg><span>Sign your name</span></button>
+  </nav>
+
+  <button class="credits-link" id="creditsBtn">Photo &amp; art credits</button>
+
+  <!-- overlay sheets -->
+  <section class="sheet" id="sheet" aria-hidden="true">
+    <button class="close" id="closeSheet" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+    </button>
+    <button class="back" id="backSheet" aria-label="Back" hidden>
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="sheet-body" id="sheetBody"></div>
+  </section>
+  <div class="toast" id="toast"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-quill" viewBox="0 0 64 64">
+      <path d="M56 4C38 8 22 22 14 40l-4 10 3 1 4-9c10-4 20-10 26-18-5 2-10 3-14 2 8-2 14-6 18-11-3 1-6 1-9 0 7-3 13-7 18-13z" fill="currentColor"/>
+      <path d="M8 60l6-14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-bell" viewBox="0 0 64 64">
+      <path d="M32 6c-2 0-3 1-3 3v2c-9 2-14 10-14 20v10l-5 7v3h44v-3l-5-7V31c0-10-5-18-14-20V9c0-2-1-3-3-3z" fill="currentColor"/><circle cx="32" cy="56" r="5" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-door" viewBox="0 0 64 64">
+      <path d="M14 58V14a18 18 0 0136 0v44z" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="40" cy="36" r="3.5" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width="5"/><path d="M32 18v15l10 6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-person" viewBox="0 0 64 64">
+      <circle cx="32" cy="20" r="11" fill="currentColor"/><path d="M12 58c2-14 10-22 20-22s18 8 20 22z" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-speak" viewBox="0 0 24 24">
+      <path d="M4 9v6h4l5 4V5L8 9zM16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+<script src="credits.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
