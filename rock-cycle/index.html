@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#14201c">
+<title>Rock Cycle Machine</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%8C%8B%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div><div class="kicker">Spanish Fork Field Station</div><h1>Rock Cycle Machine</h1></div>
+    <div class="topbtns"><button class="pill ghost" id="readBtn" aria-label="Read to me"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1A9 9 0 0 0 14 3.2z"/></svg><span>Read to me</span></button>
+    <button class="pill ghost" id="resetBtn">↺ <span>Start over</span></button></div>
+  </header>
+  <main class="main">
+    <section class="machine">
+      <div class="chamber" id="chamber">
+        <div class="glass"></div>
+        <canvas id="matCv"></canvas>
+        <img id="matImg" alt="" draggable="false">
+        <div class="slab" id="slab"><span>TONS OF ROCK</span></div>
+        <div class="squeeze l">➜</div><div class="squeeze r">➜</div>
+        <canvas id="fxCv"></canvas>
+        <div class="ring"></div>
+      </div>
+      <div class="plaque"><div class="fam" id="fam">Melted rock</div><div class="nm" id="nm">Magma</div></div>
+      <p class="say" id="say">Magma is rock so hot it has melted into a glowing liquid. Push a button to see what happens!</p>
+    </section>
+    <section class="side">
+      <div class="panel cyc"><h2>The rock cycle</h2><svg id="cycle" viewBox="0 0 400 330"></svg></div>
+      <div class="panel col"><h2>Rocks I made <span id="count">1/9</span></h2><div class="slots" id="slots"></div></div>
+    </section>
+  </main>
+  <nav class="controls" id="controls">
+    <button class="ctl melt" data-a="melt"><i>🔥</i><b>Melt</b></button>
+    <button class="ctl cool" data-a="cool"><i>❄️</i><b>Cool</b></button>
+    <button class="ctl weather" data-a="weather"><i>🌧️</i><b>Weather</b></button>
+    <button class="ctl press" data-a="press"><i>⬇️</i><b>Press</b></button>
+    <button class="ctl heat" data-a="heat"><i>🌋</i><b>Heat &amp; Squeeze</b></button>
+  </nav>
+  <footer class="foot"><button id="creditsBtn">Photo credits</button></footer>
+</div>
+<div class="modal" id="modal" aria-hidden="true"><div class="card" id="card"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<script src="credits.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
