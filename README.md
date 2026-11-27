@@ -2,6 +2,7 @@
 
 Interactive learning pages for our family homeschool.
 
+- **[Ships Ahoy!](https://camronstewart.github.io/homeschool-interactives/ships/)**: For Ian: tap ships through history on a world map and timeline, test what floats or sinks and shape a clay boat to hold pennies, build and launch a wooden sailing ship, sail a boat with the wind, and learn the parts of the real USS Constitution. Big pictures, sounds and read-aloud, very little reading. Photo credits are behind the "Photo credits" button on its home screen.
 - **[Rock Cycle Machine](https://camronstewart.github.io/homeschool-interactives/rock-cycle/)**: Melt, cool, weather, press and squeeze to turn magma into granite, sand, sandstone, quartzite, limestone and marble. Photo credits are in the page footer.
 - **[Journey to the Center of the Earth](https://camronstewart.github.io/homeschool-interactives/earth-layers/)**: Swipe down from a Utah canyon through soil, fossils, bedrock, crust and mantle to the iron core, finding something at every layer. Photo credits are in the page footer.
 - **[Liberty Village, 1774](https://camronstewart.github.io/homeschool-interactives/colonial-town/)**: Drag the blacksmith, printer, Paul Revere the silversmith, cooper, farmer, miller and weaver to their shops on an old-style village map and learn how families got by without stores. Photo credits are in the page footer.
